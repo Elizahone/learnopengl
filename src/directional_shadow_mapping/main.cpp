@@ -154,7 +154,7 @@ int main() {
     glGenFramebuffers(1, &depthMapFBO);
 
     unsigned int depthMap;
-    const int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+    const int SHADOW_WIDTH = 4028, SHADOW_HEIGHT = 4028;
     glGenTextures(1, &depthMap);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, depthMap);
@@ -185,6 +185,21 @@ int main() {
 
     glEnable(GL_DEPTH_TEST);
 
+
+    glm::mat4 lightProjection, lightView;
+    glm::mat4 lightSpaceMatrix;
+    float near_plane = 1.0f, far_plane = 7.5f;
+    lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+    lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0, 1.0, 0));
+    lightSpaceMatrix = lightProjection * lightView;
+    depthShader.use();
+    depthShader.setMat4("lightSpaceMatrix", glm::value_ptr(lightSpaceMatrix));
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        renderScene(depthShader, planeVAO, cubeVAO);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     while (!glfwWindowShouldClose(window)) {
 
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -200,21 +215,6 @@ int main() {
             lastFPSTime = currentFrame;
         }
         processInput(window);
-
-
-        glm::mat4 lightProjection, lightView;
-        glm::mat4 lightSpaceMatrix;
-        float near_plane = 1.0f, far_plane = 7.5f;
-        lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-        lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0, 1.0, 0));
-        lightSpaceMatrix = lightProjection * lightView;
-        depthShader.use();
-        depthShader.setMat4("lightSpaceMatrix", glm::value_ptr(lightSpaceMatrix));
-        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-            glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-            glClear(GL_DEPTH_BUFFER_BIT);
-            renderScene(depthShader, planeVAO, cubeVAO);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, screenWidth, screenHeight);

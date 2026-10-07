@@ -19,4 +19,5 @@ target_link_libraries(learnopengl PUBLIC OpenGL::GL glfw)
 target_compile_definitions(learnopengl PUBLIC RESOURCE_DIR="${CMAKE_SOURCE_DIR}/resource")
 
 add_subdirectory(src/minimal)
-add_subdirectory(src/shadow_mapping)
+add_subdirectory(src/directional_shadow_mapping)
+add_subdirectory(src/point_shadow)
